@@ -1,0 +1,56 @@
+<?php
+include 'TokenIterator.php';
+include 'Tokenizer.php';
+include 'TokenizerException.php';
+include 'pdf_parser.php';
+ini_set('max_execution_time', (1 * 60 * 60));
+$result = '';
+include 'pdf2text.php';
+// current location      : /search/pdf_text/convert.php
+// location of pdf files : /search/fileupload/*.pdf
+$array_filename = glob('../fileupload/*.pdf');
+$number = 0;
+foreach ($array_filename as $filename) {
+    $number++;
+    $text = pdf2text($filename);
+    $handle = fopen('' . $number . '.txt', 'w'); // open/create txt file
+    fwrite($handle, $text); // write file
+    unset($text);
+    fclose($handle);        // close file
+    unset($handle);
+}
+unset($array_filename, $filename, $number);
+// current location      : /search/pdf_text/convert.php
+// location of txt files : /search/pdf_text/*.txt
+$array_filename = glob('./*.txt');
+foreach ($array_filename as $filename)
+    {
+        $size = filesize($filename);
+        if ($size > 0)
+        {
+            $handle = fopen($filename, 'r');
+            $text = fread($handle, $size);
+            fclose($handle);
+            unset($handle, $size);
+       
+              // token
+                $token = strtok($text, ' ');
+                unset($text);
+                while ($token !== false)
+                {
+                    $result .= '' . $token . "\r\n";
+                    echo "$token<br><br>";
+                    $token = strtok(' ');
+                }
+        }
+    } 
+unset($array_filename, $filename, $token);
+// show/print result
+echo $result;
+ // save to file
+$handle = fopen('dic.txt', 'w');    
+fwrite($handle, $result);
+fclose($handle);
+ unset($result, $handle);
+exit();
+?>
